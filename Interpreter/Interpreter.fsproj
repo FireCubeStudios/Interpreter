@@ -6,11 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Eval.fs" />
-    <Compile Include="Language.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Interpreter\Language.fs" />
+    <Compile Include="Interpreter\State.fs" />
+    <Compile Include="Interpreter\Eval.fs" />
     <Compile Include="Programs.fs" />
-    <Compile Include="State.fs" />
   </ItemGroup>
 
 </Project>

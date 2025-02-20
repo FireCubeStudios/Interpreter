@@ -1,5 +1,7 @@
 module Interpreter.Programs
-
+    (*
+        Example programs
+    *)
     open Interpreter.Language
     
     let factorial x =
