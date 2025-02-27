@@ -11,7 +11,7 @@ module Interpreter.Language
 
     type aexpr =
         | Num of int
-        | Var of string  // Remove if you want to start without State.fs
+        | Var of string
         | Add of aexpr * aexpr
         | Mul of aexpr * aexpr
         | Div of aexpr * aexpr
