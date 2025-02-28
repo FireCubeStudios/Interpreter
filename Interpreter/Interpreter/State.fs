@@ -36,36 +36,45 @@ module Interpreter.State
     
     (*
         A function to declare a variable 'x' with an initial value of 0
-        The function takes a variable name 'x' and a state 'st' and returns a "state option"
-        The "state option" returns "None" if any of the following conditions are violated:
+        The function takes a variable name 'x' and a state 'st' and returns a "state Result"
+        The function returns an Error of "error" type if any of the following conditions are violated:
         - x is a valid variable name
         - x is not a reserved variable name
         - x does not exist in the variables in the state "st"
-        If all conditions are valid then a "state option" with the variable 'x' = 0 is returned
+        If all conditions are valid then a "state Result.Ok" with the variable 'x' = 0 is returned
+        Otherwise the corresponding Result.Error is returned with the 'x' variable name as the argument
     *)
     let declare x st = 
-        if not(Map.containsKey x st.variables) && validVariableName x && not(reservedVariableName x) then
-            Some({ variables = Map.add x 0 st.variables })
-        else
-            None;;
+        match x with
+        | x when Map.containsKey x st.variables -> Error (error.VarAlreadyExists x)
+        | x when not(validVariableName x) -> Error (error.InvalidVarName x)
+        | x when reservedVariableName x -> Error (error.ReservedName x)
+        | _ -> Ok { variables = Map.add x 0 st.variables };;
 
     (*
-        Given a variable name 'x' and a state 'st' return the value of 'x' if it exists in the state
-        If it does not exist in the state return None 
-        Otherwise return the value in a "Some" int option
+        Given a variable name 'x' and a state 'st' return the value of 'x' if it exists in the state environment
+        We check if 'x' exists in the state environment by using "Map.containsKey" on the state "st"
+        If 'x' exists in "st" we return the value of 'x' in a "Result.Ok" type with the value as the argument
+        If 'x' does not exist in the state return "Result.Error" of "error.VarNotDeclared" with 'x' variable name as argument
     *)
-    let getVar x st = Map.tryFind x st.variables
+    let getVar x st = 
+        if Map.containsKey x st.variables then 
+            Ok (Map.find x st.variables)
+        else 
+            Error (error.VarNotDeclared x);;
 
     (*
         Given a variable name 'x', an int value 'v' and a state 'st' set the value of 'x' to 'v'
-        If 'x' does not exist in the state return None 
-        Otherwise return the "state option" which has the variable 'x' updated to the value 'v'
+        We check if 'x' exists in the state environment by using "Map.containsKey" on the state "st"
+        If 'x' exists in the state environment "st" we will first add set the value of 'x' to be 'v' in "st"
+        Next we will return the new "st" state environment in a "Result.Ok" type which has the variable 'x' updated to the value 'v'
+        If 'x' does not exist in the state return "Result.Error" of "error.VarNotDeclared" with 'x' variable name as argument
     *)
     let setVar x v st =
         if Map.containsKey x st.variables then
-            Some({ variables = Map.add x v st.variables })
+            Ok { variables = Map.add x v st.variables }
         else
-            None;;
+            Error (error.VarNotDeclared x);;
 
     let random _ = failwith "not implemented"
     
