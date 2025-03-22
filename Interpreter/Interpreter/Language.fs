@@ -8,6 +8,9 @@ module Interpreter.Language
         | VarNotDeclared of string
         | VarAlreadyExists of string
         | InvalidVarName of string
+        | OutOfMemory
+        | NegativeMemoryAllocated of int
+        | MemoryNotAllocated of int
 
     type aexpr =
         | Num of int
@@ -16,6 +19,7 @@ module Interpreter.Language
         | Mul of aexpr * aexpr
         | Div of aexpr * aexpr
         | Mod of aexpr * aexpr
+        | MemRead of aexpr
     
     let (.+.) a b = Add (a, b)
     let (.-.) a b = Add (a, Mul (b, Num -1))
@@ -50,5 +54,8 @@ module Interpreter.Language
         | While of bexpr * stmnt
         | Assign of string * aexpr
         | Seq of stmnt * stmnt
+        | Alloc of string * aexpr
+        | MemWrite of aexpr * aexpr
+        | Free of aexpr * aexpr
     
     let IT(b, c) = If(b, c, Skip)
