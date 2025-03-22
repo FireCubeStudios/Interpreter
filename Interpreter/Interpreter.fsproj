@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <Compile Include="Interpreter\Language.fs" />
+    <Compile Include="Interpreter\State.fsi" />
     <Compile Include="Interpreter\State.fs" />
     <Compile Include="Interpreter\Eval.fs" />
     <Compile Include="Programs.fs" />
