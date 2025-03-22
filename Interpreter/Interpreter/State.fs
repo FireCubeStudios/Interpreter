@@ -4,6 +4,24 @@ module Interpreter.State
     *)
     open Result
     open Language
+
+    (*
+        A "state" type record which represents a variable stat eenvironment
+        "variables" contains a Map from strings to integers that contains the variables
+        The map is defined as: Map<VARIABLE_NAME, VARIABLE_VALUE>
+
+        Update 0.2: With the addition of variable shadowing there are some changes
+        Variable shadowing means that variables defined in statement blocks like "if" or "while" are not available outside the statement
+        Now the "state" type contains a "stack" of variable "Maps"
+        The "stack" is represented with a list and it represents the equivalent to a "frame stack"
+        Each item in the "stack" represents the variable environment for that statement block
+        When entering a statement block we would push a new empty  variable environment "Map" to the top of the stack
+        When exiting a statement block we would pop the variable enrivonment "Map" from the top of the stack
+    *)
+    type state = { variables: Map<string, int> list }
+
+    // A function that returns a state with an empty variable environment unit -> state
+    let mkState () = { variables = [Map.empty] }
     
     (*
         Checks if variable name v is reserved
@@ -26,15 +44,6 @@ module Interpreter.State
             false;;
     
     (*
-        A "state" type record which contains a Map from strings to integers that contains the variables
-        aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE>
-    *)
-    type state = { variables: Map<string, int> }
-
-    // A function that returns a state with an empty variable environment unit -> state
-    let mkState () = { variables = Map.empty }
-    
-    (*
         A function to declare a variable 'x' with an initial value of 0
         The function takes a variable name 'x' and a state 'st' and returns a "state Result"
         The function returns an Error of "error" type if any of the following conditions are violated:
@@ -43,6 +52,8 @@ module Interpreter.State
         - x does not exist in the variables in the state "st"
         If all conditions are valid then a "state Result.Ok" with the variable 'x' = 0 is returned
         Otherwise the corresponding Result.Error is returned with the 'x' variable name as the argument
+
+        TO CHANGE
     *)
     let declare x st = 
         match x with
@@ -56,6 +67,8 @@ module Interpreter.State
         We check if 'x' exists in the state environment by using "Map.containsKey" on the state "st"
         If 'x' exists in "st" we return the value of 'x' in a "Result.Ok" type with the value as the argument
         If 'x' does not exist in the state return "Result.Error" of "error.VarNotDeclared" with 'x' variable name as argument
+
+        // TO CHANGE
     *)
     let getVar x st = 
         if Map.containsKey x st.variables then 
@@ -69,6 +82,8 @@ module Interpreter.State
         If 'x' exists in the state environment "st" we will first add set the value of 'x' to be 'v' in "st"
         Next we will return the new "st" state environment in a "Result.Ok" type which has the variable 'x' updated to the value 'v'
         If 'x' does not exist in the state return "Result.Error" of "error.VarNotDeclared" with 'x' variable name as argument
+
+        // TO CHANGE
     *)
     let setVar x v st =
         if Map.containsKey x st.variables then
@@ -78,5 +93,15 @@ module Interpreter.State
 
     let random _ = failwith "not implemented"
     
-    let push _ = failwith "not implemented"
-    let pop _ = failwith "not implemented"     
+    (*
+    *)
+    let push st = { variables = Map.empty::st.variables }
+
+    (*
+        Pops the "variable state environment" from the top of the "st" state stack
+        Fails if stack is empty
+    *)
+    let pop st = 
+        match st.variables with
+        | [] -> []
+        | map::stack -> stack
