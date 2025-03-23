@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Interpreter\Memory.fsi" />
     <Compile Include="Interpreter\Memory.fs" />
     <Compile Include="Interpreter\Language.fs" />
     <Compile Include="Interpreter\State.fsi" />

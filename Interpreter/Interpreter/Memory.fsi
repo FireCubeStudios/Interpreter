@@ -1,12 +1,6 @@
 ﻿module Interpreter.Memory
     (*
-        This module contains a model for memory
-
-        The following piece of memory stores the values 2, 3, and 42 at addresses 0, 5, and 9, respectively
-         0 1 2 3 4 5 6 7 8  9 10 ...
-        -------------------------
-        |2| | | | |3| | | |42|  | ...
-        -------------------------
+        This signature file contains signatures for Memory.fs which manages program memory
     *)
     
     (*
@@ -21,7 +15,7 @@
         Creates a blank memory representation with the pointer "next" set to 0
         NOTE: memSize argument unused right now
     *)
-    let empty (memSize: int) = { memory = Map.empty; next = 0 }
+    val empty : int -> memory
 
     (*
         A function which that given an amount of memory to allocate "size" and a memory "mem" returns a (memory * int) option
@@ -31,16 +25,7 @@
             Where the "next" pointer is updated to next + size
         - Returns None otherwise if "size" is smaller than or equal to 0
     *)
-    let alloc size mem = 
-        if size <= 0 then None 
-        else 
-            let limit = mem.next + size - 1
-            let rec initialise address limit map =
-                match address with
-                | address when address <= limit -> Map.add address 0 map |> initialise (address + 1) limit
-                | _ -> map
-            let allocatedMemory = initialise mem.next limit mem.memory
-            Some({ memory = allocatedMemory; next = mem.next }, mem.next + size)
+    val alloc : int -> memory -> (memory * int) option
     
     (*
         A function which takes a "ptr" pointer int, a "size" int and a "mem" memory type and returns a memory option
@@ -49,24 +34,20 @@
             As long as all of these addresses are allocated in "mem"
         - Returns None otherwise, Note: the function does not decrease the "next" pointer
     *)
-    let free ptr size mem = 
-        let limit = ptr + size - 1
-        limit
+    val free : int -> int -> memory -> memory option
 
     (*
         A function to set a value 'v' at the address "ptr" in the "mem" memory
         - returns a Some mem' option where mem' is the memory type with the value 'v' at the address "ptr"
         - retrns a None option if the address "ptr" does not exist
     *)
-    let setMem ptr v mem = 
-        if mem.memory.ContainsKey(ptr) then 
-            Some({ memory = Map.add ptr v mem.memory; next = mem.next }) 
-        else None
+    val setMem : int -> int -> memory -> memory option
        
     (*
         A function to get the value from the address "ptr" in the "mem" memory
         - returns a Some 'v' option  where 'v' is the value at the address "ptr" in the "mem" memory
         - retrns a None option if the address "ptr" is not allocated
     *)
-    let getMem ptr mem = Map.tryFind ptr mem.memory
+    val getMem : int -> memory -> int option
+
 
