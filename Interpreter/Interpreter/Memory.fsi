@@ -18,7 +18,7 @@
     val empty : int -> memory
 
     (*
-        A function which that given an amount of memory to allocate "size" and a memory "mem" returns a (memory * int) option
+        A function that given an amount of memory to allocate "size" and a memory "mem" returns a (memory * int) option
         It basically returns a newly allocated "memory" of amount "size" all set to 0 if "size" > 0
         - Returns Some(mem', next) 
             Where mem' is identical to "mem" but with all addresses from "next" to "next + size - 1" set to 0

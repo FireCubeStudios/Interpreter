@@ -2,7 +2,7 @@ module Interpreter.State
     (*
         This module Interpreter.State ontains program state
     *)
-    open Result
+    open Memory
     open Language
 
     (*
@@ -27,12 +27,14 @@ module Interpreter.State
     
     (*
         A "state" type record which contains a Map from strings to integers that contains the variables
-        aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE>
+        aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE> for the variables
+        This represnts the current program state
+        NEW: Added memory with the "memory" type from Memory.fs
     *)
-    type state = { variables: Map<string, int> }
+    type state = { variables: Map<string, int>; memory: memory }
 
-    // A function that returns a state with an empty variable environment unit -> state
-    let mkState () = { variables = Map.empty }
+    // A function that returns a state with an empty variable environment and memory of size "memSize"
+    let mkState memSize = { variables = Map.empty; memory = empty memSize }
     
     (*
         A function to declare a variable 'x' with an initial value of 0
@@ -49,7 +51,7 @@ module Interpreter.State
         | x when Map.containsKey x st.variables -> Error (error.VarAlreadyExists x)
         | x when not(validVariableName x) -> Error (error.InvalidVarName x)
         | x when reservedVariableName x -> Error (error.ReservedName x)
-        | _ -> Ok { variables = Map.add x 0 st.variables };;
+        | _ -> Ok { variables = Map.add x 0 st.variables; memory = st.memory };;
 
     (*
         Given a variable name 'x' and a state 'st' return the value of 'x' if it exists in the state environment
@@ -72,11 +74,40 @@ module Interpreter.State
     *)
     let setVar x v st =
         if Map.containsKey x st.variables then
-            Ok { variables = Map.add x v st.variables }
+            Ok { variables = Map.add x v st.variables; memory = st.memory }
         else
             Error (error.VarNotDeclared x);;
 
     let random _ = failwith "not implemented"
     
     let push _ = failwith "not implemented"
-    let pop _ = failwith "not implemented"     
+    let pop _ = failwith "not implemented"  
+    
+    (*
+        Below we introduce new methods for working with memory using functions from Memory.fs
+    *)
+
+    (*
+    *)
+    let alloc x size (state: state) = 
+        x
+    
+    (*
+    *)
+    let free ptr size state = 
+        let memory = free ptr size state.memory
+        match memory with
+        | Some(memory) -> Some({ variables = state.variables; memory = memory })
+        | None -> None
+
+    (*
+    *)
+    let setMem ptr v state = 
+        let memory = setMem ptr v state.memory
+        match memory with
+        | Some(memory) -> Some({ variables = state.variables; memory = memory })
+        | None -> None
+       
+    (*
+    *)
+    let getMem ptr state = getMem ptr state.memory

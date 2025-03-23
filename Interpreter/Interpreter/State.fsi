@@ -2,17 +2,19 @@
     (*
         This signature file contains signatures for State.fs that manages program state
     *)
-    open Result
+    open Memory
     open Language
     
     (*
         A "state" type record which contains a Map from strings to integers that contains the variables
-        aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE>
+        aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE> for the variables
+        This represnts the current program state
+        NEW: Added memory with the "memory" type from Memory.fs
     *)
-    type state = { variables: Map<string, int> }
+    type state = { variables: Map<string, int>; memory: memory }
 
-    // A function that returns a state with an empty variable environment unit -> state
-    val mkState : unit -> state
+    // A function that returns a state with an empty variable environment and memory of size "memSize"
+    val mkState : int -> state
     
     (*
         A function to declare a variable 'x' with an initial value of 0
@@ -42,3 +44,23 @@
         If 'x' does not exist in the state return "Result.Error" of "error.VarNotDeclared" with 'x' variable name as argument
     *)
     val setVar : string -> int -> state -> Result<state, error>
+
+    (*
+        Below we introduce new methods for working with memory using functions from Memory.fs
+    *)
+
+    (*
+    *)
+    val alloc : string -> int -> state -> state option
+    
+    (*
+    *)
+    val free : int -> int -> state -> state option
+
+    (*
+    *)
+    val setMem : int -> int -> state -> state option
+       
+    (*
+    *)
+    val getMem : int -> state -> int option

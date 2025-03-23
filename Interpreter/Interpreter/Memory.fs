@@ -24,7 +24,7 @@
     let empty (memSize: int) = { memory = Map.empty; next = 0 }
 
     (*
-        A function which that given an amount of memory to allocate "size" and a memory "mem" returns a (memory * int) option
+        A function that given an amount of memory to allocate "size" and a memory "mem" returns a (memory * int) option
         It basically returns a newly allocated "memory" of amount "size" all set to 0 if "size" > 0
         - Returns Some(mem', next) 
             Where mem' is identical to "mem" but with all addresses from "next" to "next + size - 1" set to 0
@@ -51,7 +51,8 @@
     *)
     let free ptr size mem = 
         let limit = ptr + size - 1
-        limit
+        let x = mem.next
+        Some(mem)
 
     (*
         A function to set a value 'v' at the address "ptr" in the "mem" memory
