@@ -91,27 +91,27 @@ module Interpreter.State
     *)
     let alloc x size state =
         match alloc size state.memory with
-        | Some (mem', ptr) -> 
+        | Ok (mem', ptr) -> 
             match setVar x ptr state with
-            | Ok st' -> Some { st' with memory = mem' }  // Update memory in new state
-            | Error _ -> None  // Variable assignment failed
-        | None -> None  // Memory allocation failed
+            | Ok st' -> Ok { st' with memory = mem' }  // Update memory in new state
+            | Error e -> Error e  // Variable assignment failed
+        | Error e -> Error e  // Memory allocation failed
     
     (*
     *)
     let free ptr size state = 
         let memory = free ptr size state.memory
         match memory with
-        | Some(memory) -> Some({ variables = state.variables; memory = memory })
-        | None -> None
+        | Ok memory -> Ok { variables = state.variables; memory = memory }
+        | Error e -> Error e
 
     (*
     *)
     let setMem ptr v state = 
         let memory = setMem ptr v state.memory
         match memory with
-        | Some(memory) -> Some({ variables = state.variables; memory = memory })
-        | None -> None
+        | Ok memory -> Ok { variables = state.variables; memory = memory }
+        | Error e -> Error e
        
     (*
     *)

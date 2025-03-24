@@ -56,8 +56,9 @@ module Interpreter.Eval
         | MemRead e1 ->   
             match arithEval e1 st with
             | Ok ptr -> 
-                let x = getMem ptr st
-                if x.IsSome then Ok x.Value else Error error.OutOfMemory // WRONG TODO
+                match getMem ptr st with
+                | Ok x -> Ok x
+                | Error e -> Error e
             | Error e -> Error e;;
 
     // Equivalent to arithEval with the use of Result.bind
@@ -169,20 +170,26 @@ module Interpreter.Eval
             match arithEval e st with
             | Ok size -> 
                 match alloc x size st with
-                    | Some st' -> Ok st'
-                    | None -> Error error.OutOfMemory
+                    | Ok st' -> Ok st'
+                    | Error e -> Error e
             | Error e -> Error e
         | Free(e1, e2) ->
-            match arithEval e1 st, arithEval e2 st with
-            | Ok ptr, Ok size -> 
-                match free ptr size st with
-                    | Some st' -> Ok st'
-                    | None -> Error error.OutOfMemory
-            | _ -> Error error.OutOfMemory
+            match arithEval e1 st with
+            | Ok ptr ->
+                match arithEval e2 st with
+                | Ok size ->
+                    match free ptr size st with
+                    | Ok st' -> Ok st'
+                    | Error e -> Error e
+                | Error e -> Error e
+            | Error e -> Error e
         | MemWrite(e1, e2) ->
-            match arithEval e1 st, arithEval e2 st with
-            | Ok ptr, Ok v -> 
-                match setMem ptr v st with
-                    | Some st' -> Ok st'
-                    | None -> Error error.OutOfMemory
-            | _ -> Error error.OutOfMemory;;
+            match arithEval e1 st with
+            | Ok ptr ->
+                match arithEval e2 st with
+                | Ok v ->
+                    match setMem ptr v st with
+                    | Ok st' -> Ok st'
+                    | Error e -> Error e
+                | Error e -> Error e
+            | Error e -> Error e;;

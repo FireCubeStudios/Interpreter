@@ -51,16 +51,16 @@
 
     (*
     *)
-    val alloc : string -> int -> state -> state option
+    val alloc : string -> int -> state -> Result<state, error>
     
     (*
     *)
-    val free : int -> int -> state -> state option
+    val free : int -> int -> state -> Result<state, error>
 
     (*
     *)
-    val setMem : int -> int -> state -> state option
+    val setMem : int -> int -> state -> Result<state, error>
        
     (*
     *)
-    val getMem : int -> state -> int option
+    val getMem : int -> state -> Result<int, error>

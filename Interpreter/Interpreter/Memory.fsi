@@ -2,7 +2,8 @@
     (*
         This signature file contains signatures for Memory.fs which manages program memory
     *)
-    
+    open Language
+
     (*
         A "memory" type record which contains a Map from integers memory adresses) to integers (memory values)
         Also contains an integer "next" which is a pointer to the next available free memory address
@@ -25,7 +26,7 @@
             Where the "next" pointer is updated to next + size
         - Returns None otherwise if "size" is smaller than or equal to 0
     *)
-    val alloc : int -> memory -> (memory * int) option
+    val alloc : int -> memory -> Result<(memory * int), error>
     
     (*
         A function which takes a "ptr" pointer int, a "size" int and a "mem" memory type and returns a memory option
@@ -34,20 +35,20 @@
             As long as all of these addresses are allocated in "mem"
         - Returns None otherwise, Note: the function does not decrease the "next" pointer
     *)
-    val free : int -> int -> memory -> memory option
+    val free : int -> int -> memory -> Result<memory, error>
 
     (*
         A function to set a value 'v' at the address "ptr" in the "mem" memory
         - returns a Some mem' option where mem' is the memory type with the value 'v' at the address "ptr"
         - retrns a None option if the address "ptr" does not exist
     *)
-    val setMem : int -> int -> memory -> memory option
+    val setMem : int -> int -> memory -> Result<memory, error>
        
     (*
         A function to get the value from the address "ptr" in the "mem" memory
         - returns a Some 'v' option  where 'v' is the value at the address "ptr" in the "mem" memory
         - retrns a None option if the address "ptr" is not allocated
     *)
-    val getMem : int -> memory -> int option
+    val getMem : int -> memory -> Result<int, error>
 
 

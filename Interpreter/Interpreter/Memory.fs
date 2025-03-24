@@ -59,7 +59,7 @@
         let addresses = [ptr .. limit]
         if allExist addresses then
             let updatedMemory = List.fold (fun m addr -> Map.remove addr m) mem.memory addresses
-            Some { mem with memory = updatedMemory }
+            Ok { mem with memory = updatedMemory }
         else None
     (*
         A function to set a value 'v' at the address "ptr" in the "mem" memory
@@ -68,8 +68,8 @@
     *)
     let setMem ptr v mem = 
         if mem.memory.ContainsKey(ptr) then 
-            Some({ memory = Map.add ptr v mem.memory; next = mem.next }) 
-        else None
+            Ok { memory = Map.add ptr v mem.memory; next = mem.next }
+        else Error
        
     (*
         A function to get the value from the address "ptr" in the "mem" memory
