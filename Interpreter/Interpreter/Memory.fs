@@ -51,9 +51,16 @@
     *)
     let free ptr size mem = 
         let limit = ptr + size - 1
-        let x = mem.next
-        Some(mem)
+        let rec allExist addresses =
+            match addresses with
+            | [] -> true
+            | address :: rest -> if Map.containsKey address mem.memory then allExist rest else false
 
+        let addresses = [ptr .. limit]
+        if allExist addresses then
+            let updatedMemory = List.fold (fun m addr -> Map.remove addr m) mem.memory addresses
+            Some { mem with memory = updatedMemory }
+        else None
     (*
         A function to set a value 'v' at the address "ptr" in the "mem" memory
         - returns a Some mem' option where mem' is the memory type with the value 'v' at the address "ptr"

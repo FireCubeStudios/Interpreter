@@ -87,10 +87,15 @@ module Interpreter.State
         Below we introduce new methods for working with memory using functions from Memory.fs
     *)
 
-    (*
+    (* TODO ALL COMMENTS
     *)
-    let alloc x size (state: state) = 
-        x
+    let alloc x size state =
+        match alloc size state.memory with
+        | Some (mem', ptr) -> 
+            match setVar x ptr state with
+            | Ok st' -> Some { st' with memory = mem' }  // Update memory in new state
+            | Error _ -> None  // Variable assignment failed
+        | None -> None  // Memory allocation failed
     
     (*
     *)

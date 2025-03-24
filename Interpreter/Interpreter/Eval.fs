@@ -22,6 +22,8 @@ module Interpreter.Eval
         - return Result.Ok(x % y) if 'a' is equal to Mod(x, y), 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
           'y' should also not be 0 and if it is then we return "Result.Error" of type "error.DivisionByZero"
         - otherwise we propagate the "Result.Error" type from recursive calls or other functions that returned error
+
+        NOTE: OUTDATED, need comment for memRead
     *)
     let rec arithEval a st = 
         match a with
@@ -50,6 +52,12 @@ module Interpreter.Eval
             | Ok x -> match arithEval y st with
                       | Ok y -> if y <> 0 then Ok (x % y) else Error error.DivisionByZero // y <> 0 == y != 0
                       | Error e -> Error e
+            | Error e -> Error e
+        | MemRead e1 ->   
+            match arithEval e1 st with
+            | Ok ptr -> 
+                let x = getMem ptr st
+                if x.IsSome then Ok x.Value else Error error.OutOfMemory // WRONG TODO
             | Error e -> Error e;;
 
     // Equivalent to arithEval with the use of Result.bind
@@ -65,7 +73,7 @@ module Interpreter.Eval
                         arithEval2 y st |> Result.bind (fun y -> if y <> 0 then Ok (x / y) else Error error.DivisionByZero))  
         | Mod (x, y) -> arithEval2 x st |> Result.bind (fun x -> 
                         arithEval2 y st |> Result.bind (fun y -> if y <> 0 then Ok (x % y) else Error error.DivisionByZero));;
-    
+
     (*
         A function which evaluates boolean statements
         It takes a boolean expression 'b' of type "bexpr" defined in Language.fs
@@ -93,7 +101,7 @@ module Interpreter.Eval
                           boolEval b2 st |> Result.bind (fun b2 -> Ok (b1 && b2))) 
         | Not(bool) -> boolEval bool st |> Result.bind (fun bool ->  Ok (not bool)) 
 
-   (*
+    (*
         A function which evaluetes statements
         It takes a statement expression 's' of type "stmnt" defined in Language.fs
         It also takes in a variable state environment "st" of type "state" defined in State.fs
@@ -103,39 +111,39 @@ module Interpreter.Eval
         - return Result.Ok(st) if 's' is equal to "Skip"
 
         - return Result.Ok(st) if 's' is equal to Declare(v) and 'v' is a variable name of type string
-          We return the state variable environment "st" with the variable 'v' declared in "st"
-          We do this by using the State.fs "declare" function
+            We return the state variable environment "st" with the variable 'v' declared in "st"
+            We do this by using the State.fs "declare" function
 
         - return Result.Ok(st) if 's' is equal to Assign(v, x)
-          'v' is a variable name of type string and 'x' is a variable value of type "aexpr"
-          We assign a value 'x' to the variable 'v' in the "st" state environment by using the State.fs "setVar" function
-          We then return the new state variable environment "st"
+            'v' is a variable name of type string and 'x' is a variable value of type "aexpr"
+            We assign a value 'x' to the variable 'v' in the "st" state environment by using the State.fs "setVar" function
+            We then return the new state variable environment "st"
 
         - return Result.Ok(st) if 's' is equal to Seq(s1, s2)
-          Both "s1" and "s2" are statements of type "stmnt"
-          Firstly we evaluate "s1" on the state envionrment "st"
-          We will then evaluate "s2" on the resulting state environment "st" from evaluating "s1" earlier
-          We then return the new state variable environment "st" 
-          The returned result essentially had the statements "s1" and "s2" evaluated sequentially on "st"
+            Both "s1" and "s2" are statements of type "stmnt"
+            Firstly we evaluate "s1" on the state envionrment "st"
+            We will then evaluate "s2" on the resulting state environment "st" from evaluating "s1" earlier
+            We then return the new state variable environment "st" 
+            The returned result essentially had the statements "s1" and "s2" evaluated sequentially on "st"
 
         - return Result.Ok(st) if 's' is equal to If(b, s1, s2) and 'b' is a boolean expression of type "bexpr"
-          "s1" and "s2" are statements of the type "stmnt"
-          Firstly we check if the boolean expression 'b' evaluates to "Result.Ok(bool)" instead of a "Result.Error"
-          if "bool" exists and is true or false we do one of the following:
+            "s1" and "s2" are statements of the type "stmnt"
+            Firstly we check if the boolean expression 'b' evaluates to "Result.Ok(bool)" instead of a "Result.Error"
+            if "bool" exists and is true or false we do one of the following:
             - If it is true then we evaluate the statement "s1" on the state environment "st"
             - Otherwise we evaluate the statement "s2" on the state environment "st"
-          We then return the new state environment "st" as "Result.Ok(st)"
+            We then return the new state environment "st" as "Result.Ok(st)"
 
         - return Result.Ok(st) if 's' is equal to While(b, s) and 'b' is a boolean expression of type "bexpr"
-          's' is a statement of the type "stmnt"
-          Firstly we check if the boolean expression 'b' evaluates to "Result.Ok(bool)" instead of a "Result.Error"
-          if "bool" exists and is true or false we do one of the following:
+            's' is a statement of the type "stmnt"
+            Firstly we check if the boolean expression 'b' evaluates to "Result.Ok(bool)" instead of a "Result.Error"
+            if "bool" exists and is true or false we do one of the following:
             - If it is true then we evaluate the statement 's' on the state environment "st"
-              If the result of this is "Result.Ok(st)" where "st" is a new state with 's' evaluated then we do the following
+                If the result of this is "Result.Ok(st)" where "st" is a new state with 's' evaluated then we do the following
                 We evaluate the statement "While(b, s)" where 'b' is the boolean expression and 's' is a statement
                 'b' and 's' are the same as from the original function parameters
                 We return the new state environment variable "st" which has evaluated "While(b, s)"
-              Otherwise if the result of 's' evaluated on "st" was of type "Result.Error" then we return that error
+                Otherwise if the result of 's' evaluated on "st" was of type "Result.Error" then we return that error
             - Otherwise we return the original state environment variable "st"
 
         - otherwise we propagate the "Result.Error" type from "declare", "setVar", "arithEval", "boolEval" and recursive "stmntEval" calls
@@ -155,4 +163,26 @@ module Interpreter.Eval
             if bool then 
                 stmntEval s st |> Result.bind (fun state -> stmntEval (While(b, s)) state)
             else 
-                Ok st);;
+                Ok st)
+                // NEW ADDITIONS, NOTE RETURNED ERROR IS WRONG
+        | Alloc(x, e) ->
+            match arithEval e st with
+            | Ok size -> 
+                match alloc x size st with
+                    | Some st' -> Ok st'
+                    | None -> Error error.OutOfMemory
+            | Error e -> Error e
+        | Free(e1, e2) ->
+            match arithEval e1 st, arithEval e2 st with
+            | Ok ptr, Ok size -> 
+                match free ptr size st with
+                    | Some st' -> Ok st'
+                    | None -> Error error.OutOfMemory
+            | _ -> Error error.OutOfMemory
+        | MemWrite(e1, e2) ->
+            match arithEval e1 st, arithEval e2 st with
+            | Ok ptr, Ok v -> 
+                match setMem ptr v st with
+                    | Some st' -> Ok st'
+                    | None -> Error error.OutOfMemory
+            | _ -> Error error.OutOfMemory;;
