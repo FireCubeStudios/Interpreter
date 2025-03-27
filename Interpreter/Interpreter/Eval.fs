@@ -148,6 +148,8 @@ module Interpreter.Eval
             - Otherwise we return the original state environment variable "st"
 
         - otherwise we propagate the "Result.Error" type from "declare", "setVar", "arithEval", "boolEval" and recursive "stmntEval" calls
+
+        NOTE: OUTDATED
     *)
     let rec stmntEval s st = 
         match s with
@@ -165,7 +167,6 @@ module Interpreter.Eval
                 stmntEval s st |> Result.bind (fun state -> stmntEval (While(b, s)) state)
             else 
                 Ok st)
-                // NEW ADDITIONS, NOTE RETURNED ERROR IS WRONG
         | Alloc(x, e) ->
             match arithEval e st with
             | Ok size -> 

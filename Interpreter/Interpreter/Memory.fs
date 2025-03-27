@@ -8,7 +8,8 @@
         |2| | | | |3| | | |42|  | ...
         -------------------------
     *)
-    
+    open Language
+
     (*
         A "memory" type record which contains a Map from integers memory adresses) to integers (memory values)
         Also contains an integer "next" which is a pointer to the next available free memory address
@@ -32,7 +33,7 @@
         - Returns None otherwise if "size" is smaller than or equal to 0
     *)
     let alloc size mem = 
-        if size <= 0 then None 
+        if size <= 0 then Error (error.NegativeMemoryAllocated size) 
         else 
             let limit = mem.next + size - 1
             let rec initialise address limit map =
@@ -40,7 +41,7 @@
                 | address when address <= limit -> Map.add address 0 map |> initialise (address + 1) limit
                 | _ -> map
             let allocatedMemory = initialise mem.next limit mem.memory
-            Some({ memory = allocatedMemory; next = mem.next }, mem.next + size)
+            Ok ({ memory = allocatedMemory; next = mem.next + size }, mem.next + size)
     
     (*
         A function which takes a "ptr" pointer int, a "size" int and a "mem" memory type and returns a memory option
@@ -51,16 +52,21 @@
     *)
     let free ptr size mem = 
         let limit = ptr + size - 1
-        let rec allExist addresses =
+        let rec findMissingAddress addresses =
             match addresses with
-            | [] -> true
-            | address :: rest -> if Map.containsKey address mem.memory then allExist rest else false
-
+            | [] -> None  
+            | address :: rest -> 
+                if Map.containsKey address mem.memory then
+                    findMissingAddress rest
+                else
+                    Some address 
         let addresses = [ptr .. limit]
-        if allExist addresses then
+        match findMissingAddress addresses with
+        | Some ptr' -> Error (error.MemoryNotAllocated ptr') 
+        | None -> 
             let updatedMemory = List.fold (fun m addr -> Map.remove addr m) mem.memory addresses
-            Ok { mem with memory = updatedMemory }
-        else None
+            Ok { memory = updatedMemory; next = mem.next }
+
     (*
         A function to set a value 'v' at the address "ptr" in the "mem" memory
         - returns a Some mem' option where mem' is the memory type with the value 'v' at the address "ptr"
@@ -69,12 +75,15 @@
     let setMem ptr v mem = 
         if mem.memory.ContainsKey(ptr) then 
             Ok { memory = Map.add ptr v mem.memory; next = mem.next }
-        else Error
+        else Error (error.MemoryNotAllocated ptr)
        
     (*
         A function to get the value from the address "ptr" in the "mem" memory
         - returns a Some 'v' option  where 'v' is the value at the address "ptr" in the "mem" memory
         - retrns a None option if the address "ptr" is not allocated
     *)
-    let getMem ptr mem = Map.tryFind ptr mem.memory
+    let getMem ptr mem = 
+        match Map.tryFind ptr mem.memory with
+        | Some v -> Ok v
+        | None -> Error (error.MemoryNotAllocated ptr)
 
