@@ -11,6 +11,7 @@ module Interpreter.Language
         | OutOfMemory
         | NegativeMemoryAllocated of int
         | MemoryNotAllocated of int
+        | IllFormedPrint of string * int list
 
     type aexpr =
         | Num of int
@@ -20,19 +21,21 @@ module Interpreter.Language
         | Div of aexpr * aexpr
         | Mod of aexpr * aexpr
         | MemRead of aexpr
-    
-    let (.+.) a b = Add (a, b)
-    let (.-.) a b = Add (a, Mul (b, Num -1))
-    let (.*.) a b = Mul (a, b)
-    let (./.) a b = Div (a, b)
-    let (.%.) a b = Mod (a, b)    
-    
-    type bexpr =
+        | Cond of bexpr * aexpr * aexpr
+        | Random
+        | Read
+    and bexpr =
         | TT
         | Eq of aexpr * aexpr
         | Lt of aexpr * aexpr
         | Conj of bexpr * bexpr
         | Not of bexpr
+    
+    let (.+.) a b = Add (a, b)
+    let (.-.) a b = Add (a, Mul (b, Num -1))
+    let (.*.) a b = Mul (a, b)
+    let (./.) a b = Div (a, b)
+    let (.%.) a b = Mod (a, b)
     
     let FF = Not TT
     let (~~) b = Not b
@@ -57,5 +60,12 @@ module Interpreter.Language
         | Alloc of string * aexpr
         | MemWrite of aexpr * aexpr
         | Free of aexpr * aexpr
+        | Print of aexpr list * string 
     
     let IT(b, c) = If(b, c, Skip)
+    let (/>) s1 s2 = Seq(s1, s2)
+    let (.<-.) x e = Assign(x, e)
+    let For(var, init, guard, step, body) =
+        Declare var />
+        (var .<-. init) />
+        While(guard, body /> step)
