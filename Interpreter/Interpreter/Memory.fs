@@ -29,7 +29,7 @@
         It basically returns a newly allocated "memory" of amount "size" all set to 0 if "size" > 0
         - Returns Some(mem', next) 
             Where mem' is identical to "mem" but with all addresses from "next" to "next + size - 1" set to 0
-            Where the "next" pointer is updated to next + size
+            Where the "mem.next" pointer is updated to next + size
         - Returns None otherwise if "size" is smaller than or equal to 0
     *)
     let alloc size mem = 
@@ -41,7 +41,7 @@
                 | address when address <= limit -> Map.add address 0 map |> initialise (address + 1) limit
                 | _ -> map
             let allocatedMemory = initialise mem.next limit mem.memory
-            Ok ({ memory = allocatedMemory; next = mem.next + size }, mem.next + size)
+            Ok ({ memory = allocatedMemory; next = mem.next + size }, mem.next)
     
     (*
         A function which takes a "ptr" pointer int, a "size" int and a "mem" memory type and returns a memory option
