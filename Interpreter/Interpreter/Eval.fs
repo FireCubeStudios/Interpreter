@@ -5,8 +5,21 @@ module Interpreter.Eval
     open Result
     open Language
     open State
+
+    (* BELOW IS FROM OTHER "FUNCTIONAL" CODE FOLDER RTODO: ADD COMMENTS*)
+    let readFromConsole () = System.Console.ReadLine().Trim()
+    let tryParseInt (str : string) = System.Int32.TryParse str
+
+    let rec readInt () = 
+        let input = readFromConsole()
+        match tryParseInt input with
+        | (true, n) -> n
+        | (false, n) -> printfn "%s is not an integer" input // Fixes bug "The type 'string' is not compatible with the type 'Printf.TextWriterFormat<'a>'"
+                        readInt ();;
+    (* end of regin*)
     
     (*
+        ArithEval:
         A function which evaluates arithmetic statements
         It takes an arithmetic expression 'a' of type "aexpr" defined in Language.fs
         It also takes in a variable state environment "st" of type "state" defined in State.fs
@@ -24,6 +37,24 @@ module Interpreter.Eval
         - otherwise we propagate the "Result.Error" type from recursive calls or other functions that returned error
 
         NOTE: OUTDATED, need comment for memRead
+        TODO V4 V3
+    *)
+    (*
+        BoolEval:
+        A function which evaluates boolean statements
+        It takes a boolean expression 'b' of type "bexpr" defined in Language.fs
+        It also takes in a variable state environment "st" of type "state" defined in State.fs
+        The boolean expression 'b' is an expression tree which is recursively evaluated and the result is returned
+        The result is returned as a "Result<bool, error>" type where "error" is defined in Language.fs:
+        - return Result.Ok(true) if 'b' is equal to TT
+        - return Result.Ok(x = y) if 'b' is equal to Eq(x, y), where 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
+          'x' and 'y' are of type "aexpr"
+        - return Result.Ok(x < y) if 'b' is equal to Lt(x, y), where 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
+          'x' and 'y' are of type "aexpr"
+        - return Result.Ok(a && b) if 'b' is equal to Conj(b1, b2), where 'b1' evaluates to "Result.Ok(b1)" and 'y' evaluates to "Result.Ok(b2)"
+          'b1' and 'b2' are of type "bexpr"
+        - return Result.Ok(not bool) if 'b' is equal to Not(bool), where 'bool' evaluates to "Result.Ok(bool)" and is of type "bexpr"
+        - otherwise we propagate the "Result.Error" type from "arithEval" or recursive "boolEval" calls
     *)
     let rec arithEval a st = 
         match a with
@@ -60,7 +91,29 @@ module Interpreter.Eval
                 | Ok x -> Ok x
                 | Error e -> Error e
             | Error e -> Error e
-        | Random -> Ok (random st);;
+        | Random -> Ok (random st)
+        | Read -> Ok (readInt())
+        | Cond (b, a1, a2) -> 
+            match boolEval b st with
+            | Ok x -> if x = true then
+                        match arithEval a1 st with
+                        | Ok x -> Ok x
+                        | Error e -> Error e
+                      else
+                        match arithEval a2 st with
+                        | Ok x -> Ok x
+                        | Error e -> Error e
+            | Error e -> Error e
+    and boolEval b st =
+        match b with
+        | TT -> Ok true
+        | Eq(x, y) -> arithEval x st |> Result.bind (fun x -> 
+                      arithEval y st |> Result.bind (fun y -> Ok (x = y))) 
+        | Lt(x, y) -> arithEval x st |> Result.bind (fun x -> 
+                      arithEval y st |> Result.bind (fun y -> Ok (x < y))) 
+        | Conj(b1, b2) -> boolEval b1 st |> Result.bind (fun b1 -> 
+                          boolEval b2 st |> Result.bind (fun b2 -> Ok (b1 && b2)))
+        | Not(bool) -> boolEval bool st |> Result.bind (fun bool ->  Ok (not bool)) 
 
     // Equivalent to arithEval with the use of Result.bind
     let rec arithEval2 a st : Result<int, error> = 
@@ -74,34 +127,11 @@ module Interpreter.Eval
         | Div (x, y) -> arithEval2 x st |> Result.bind (fun x -> 
                         arithEval2 y st |> Result.bind (fun y -> if y <> 0 then Ok (x / y) else Error error.DivisionByZero))  
         | Mod (x, y) -> arithEval2 x st |> Result.bind (fun x -> 
-                        arithEval2 y st |> Result.bind (fun y -> if y <> 0 then Ok (x % y) else Error error.DivisionByZero));;
-
-    (*
-        A function which evaluates boolean statements
-        It takes a boolean expression 'b' of type "bexpr" defined in Language.fs
-        It also takes in a variable state environment "st" of type "state" defined in State.fs
-        The boolean expression 'b' is an expression tree which is recursively evaluated and the result is returned
-        The result is returned as a "Result<bool, error>" type where "error" is defined in Language.fs:
-        - return Result.Ok(true) if 'b' is equal to TT
-        - return Result.Ok(x = y) if 'b' is equal to Eq(x, y), where 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-          'x' and 'y' are of type "aexpr"
-        - return Result.Ok(x < y) if 'b' is equal to Lt(x, y), where 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-          'x' and 'y' are of type "aexpr"
-        - return Result.Ok(a && b) if 'b' is equal to Conj(b1, b2), where 'b1' evaluates to "Result.Ok(b1)" and 'y' evaluates to "Result.Ok(b2)"
-          'b1' and 'b2' are of type "bexpr"
-        - return Result.Ok(not bool) if 'b' is equal to Not(bool), where 'bool' evaluates to "Result.Ok(bool)" and is of type "bexpr"
-        - otherwise we propagate the "Result.Error" type from "arithEval" or recursive "boolEval" calls
-    *)
-    let rec boolEval b st =
-        match b with
-        | TT -> Ok true
-        | Eq(x, y) -> arithEval x st |> Result.bind (fun x -> 
-                      arithEval y st |> Result.bind (fun y -> Ok (x = y))) 
-        | Lt(x, y) -> arithEval x st |> Result.bind (fun x -> 
-                      arithEval y st |> Result.bind (fun y -> Ok (x < y))) 
-        | Conj(b1, b2) -> boolEval b1 st |> Result.bind (fun b1 -> 
-                          boolEval b2 st |> Result.bind (fun b2 -> Ok (b1 && b2))) 
-        | Not(bool) -> boolEval bool st |> Result.bind (fun bool ->  Ok (not bool)) 
+                        arithEval2 y st |> Result.bind (fun y -> if y <> 0 then Ok (x % y) else Error error.DivisionByZero))
+        | MemRead e1 -> arithEval2 e1 st |> Result.bind (fun ptr -> getMem ptr st)
+        | Random -> Ok (random st)
+        | Read -> Ok (readInt())
+        | Cond (b, a1, a2) -> boolEval b st |> Result.bind(fun x -> if x = true then arithEval2 a1 st else arithEval2 a2 st);;
 
     (*
         A function which evaluetes statements
@@ -150,7 +180,7 @@ module Interpreter.Eval
 
         - otherwise we propagate the "Result.Error" type from "declare", "setVar", "arithEval", "boolEval" and recursive "stmntEval" calls
 
-        NOTE: OUTDATED
+        NOTE: OUTDATED v3 v4
     *)
     let rec stmntEval s st = 
         match s with
@@ -195,14 +225,3 @@ module Interpreter.Eval
                     | Error e -> Error e
                 | Error e -> Error e
             | Error e -> Error e;;
-    
-    (* BELOW IS FROM OTHER "FUNCTIONAL" CODE FOLDER RTODO: ADD COMMENTS*)
-    let readFromConsole () = System.Console.ReadLine().Trim()
-    let tryParseInt (str : string) = System.Int32.TryParse str
-
-    let rec readInt () = 
-        let input = readFromConsole()
-        match tryParseInt input with
-        | (true, n) -> n
-        | (false, n) -> printfn "%s is not an integer" input // Fixes bug "The type 'string' is not compatible with the type 'Printf.TextWriterFormat<'a>'"
-                        readInt ();;

@@ -21,9 +21,9 @@ module Interpreter.Language
         | Div of aexpr * aexpr
         | Mod of aexpr * aexpr
         | MemRead of aexpr
-        | Cond of bexpr * aexpr * aexpr
         | Random
         | Read
+        | Cond of bexpr * aexpr * aexpr
     and bexpr =
         | TT
         | Eq of aexpr * aexpr
