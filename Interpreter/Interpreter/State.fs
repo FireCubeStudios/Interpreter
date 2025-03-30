@@ -30,11 +30,25 @@ module Interpreter.State
         aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE> for the variables
         This represnts the current program state
         NEW: Added memory with the "memory" type from Memory.fs
-    *)
-    type state = { variables: Map<string, int>; memory: memory }
 
-    // A function that returns a state with an empty variable environment and memory of size "memSize"
-    let mkState memSize = { variables = Map.empty; memory = empty memSize }
+        TODO: V4 COMMENTS
+    *)
+    type state = { variables: Map<string, int>; memory: memory; rng: System.Random }
+
+    (*
+        A function that returns a state with an empty variable environment and memory of size "memSize"
+
+        TODO: V4 COMMENTS
+    *)
+    let mkState memSize oseed = 
+        match oseed with
+        | Some(seed) -> { variables = Map.empty; memory = empty memSize; rng = System.Random(seed) }
+        | None -> { variables = Map.empty; memory = empty memSize; rng = System.Random() }
+
+    (*
+        TODO: V4 COMMENTS
+    *)
+    let random st = st.rng.Next()
     
     (*
         A function to declare a variable 'x' with an initial value of 0
@@ -51,7 +65,7 @@ module Interpreter.State
         | x when Map.containsKey x st.variables -> Error (error.VarAlreadyExists x)
         | x when not(validVariableName x) -> Error (error.InvalidVarName x)
         | x when reservedVariableName x -> Error (error.ReservedName x)
-        | _ -> Ok { variables = Map.add x 0 st.variables; memory = st.memory };;
+        | _ -> Ok { variables = Map.add x 0 st.variables; memory = st.memory; rng = st.rng };;
 
     (*
         Given a variable name 'x' and a state 'st' return the value of 'x' if it exists in the state environment
@@ -74,7 +88,7 @@ module Interpreter.State
     *)
     let setVar x v st =
         if Map.containsKey x st.variables then
-            Ok { variables = Map.add x v st.variables; memory = st.memory }
+            Ok { variables = Map.add x v st.variables; memory = st.memory; rng = st.rng }
         else
             Error (error.VarNotDeclared x);;
 
@@ -102,7 +116,7 @@ module Interpreter.State
     let free ptr size state = 
         let memory = free ptr size state.memory
         match memory with
-        | Ok memory -> Ok { variables = state.variables; memory = memory }
+        | Ok memory -> Ok { variables = state.variables; memory = memory; rng = state.rng }
         | Error e -> Error e
 
     (*
@@ -110,7 +124,7 @@ module Interpreter.State
     let setMem ptr v state = 
         let memory = setMem ptr v state.memory
         match memory with
-        | Ok memory -> Ok { variables = state.variables; memory = memory }
+        | Ok memory -> Ok { variables = state.variables; memory = memory;  rng = state.rng }
         | Error e -> Error e
        
     (*

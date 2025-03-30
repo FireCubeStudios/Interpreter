@@ -10,11 +10,22 @@
         aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE> for the variables
         This represnts the current program state
         NEW: Added memory with the "memory" type from Memory.fs
+        
+        TODO: V4
     *)
-    type state = { variables: Map<string, int>; memory: memory }
+    type state = { variables: Map<string, int>; memory: memory; rng: System.Random }
 
-    // A function that returns a state with an empty variable environment and memory of size "memSize"
-    val mkState : int -> state
+    (*
+        A function that returns a state with an empty variable environment and memory of size "memSize"
+
+        TODO: V4 COMMENTS
+    *)
+    val mkState : int -> int option -> state
+
+    (*
+    TODO: V4
+    *)
+    val random : state -> int
     
     (*
         A function to declare a variable 'x' with an initial value of 0

@@ -194,3 +194,14 @@ module Interpreter.Eval
                     | Error e -> Error e
                 | Error e -> Error e
             | Error e -> Error e;;
+    
+    (* BELOW IS FROM OTHER "FUNCTIONAL" CODE FOLDER RTODO: ADD COMMENTS*)
+    let readFromConsole () = System.Console.ReadLine().Trim()
+    let tryParseInt (str : string) = System.Int32.TryParse str
+
+    let rec readInt () = 
+        let input = readFromConsole()
+        match tryParseInt input with
+        | (true, n) -> n
+        | (false, n) -> printfn "%s is not an integer" input // Fixes bug "The type 'string' is not compatible with the type 'Printf.TextWriterFormat<'a>'"
+                        readInt ();;
