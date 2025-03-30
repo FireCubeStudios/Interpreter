@@ -59,7 +59,8 @@ module Interpreter.Eval
                 match getMem ptr st with
                 | Ok x -> Ok x
                 | Error e -> Error e
-            | Error e -> Error e;;
+            | Error e -> Error e
+        | Random -> Ok (random st);;
 
     // Equivalent to arithEval with the use of Result.bind
     let rec arithEval2 a st : Result<int, error> = 

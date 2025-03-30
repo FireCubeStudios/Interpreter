@@ -91,8 +91,6 @@ module Interpreter.State
             Ok { variables = Map.add x v st.variables; memory = st.memory; rng = st.rng }
         else
             Error (error.VarNotDeclared x);;
-
-    let random _ = failwith "not implemented"
     
     let push _ = failwith "not implemented"
     let pop _ = failwith "not implemented"  
