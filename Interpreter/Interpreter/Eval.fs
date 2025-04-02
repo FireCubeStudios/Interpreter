@@ -133,6 +133,24 @@ module Interpreter.Eval
         | Read -> Ok (readInt())
         | Cond (b, a1, a2) -> boolEval b st |> Result.bind(fun x -> if x = true then arithEval2 a1 st else arithEval2 a2 st);;
 
+
+
+    //TODO V4 COMMENTING FOR BELOW CODE
+    let split (s1 : string) (s2 : string) = s2 |> s1.Split |> Array.toList // split a string s1 from all occurences of s2 like split "ababc" "b"
+
+    let rec mergeStrings es s st =
+        match es with
+        | [] -> s
+        | a::es -> 
+            match arithEval a st with
+            | Ok x -> 
+                // replace the corresponding occurence of % in s with this
+            | Error e -> Error e;;
+    // END REGION
+
+
+
+
     (*
         A function which evaluetes statements
         It takes a statement expression 's' of type "stmnt" defined in Language.fs
@@ -224,4 +242,9 @@ module Interpreter.Eval
                     | Ok st' -> Ok st'
                     | Error e -> Error e
                 | Error e -> Error e
-            | Error e -> Error e;;
+            | Error e -> Error e
+        | Print(es, s) -> 
+            match mergeStrings es s st with
+            | Ok x -> Ok st
+            | Error e -> Error (error.IllFormedPrint (s, [0]));; //unfinished
+
