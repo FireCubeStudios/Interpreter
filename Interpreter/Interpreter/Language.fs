@@ -12,6 +12,8 @@ module Interpreter.Language
         | NegativeMemoryAllocated of int
         | MemoryNotAllocated of int
         | IllFormedPrint of string * int list
+        | UnknownFunction of string
+        | InvalidArity of string * int * int
 
     type aexpr =
         | Num of int
@@ -21,9 +23,10 @@ module Interpreter.Language
         | Div of aexpr * aexpr
         | Mod of aexpr * aexpr
         | MemRead of aexpr
+        | Cond of bexpr * aexpr * aexpr
+        | FunctionCall of string * aexpr list
         | Random
         | Read
-        | Cond of bexpr * aexpr * aexpr
     and bexpr =
         | TT
         | Eq of aexpr * aexpr
@@ -61,6 +64,7 @@ module Interpreter.Language
         | MemWrite of aexpr * aexpr
         | Free of aexpr * aexpr
         | Print of aexpr list * string 
+        | Return of aexpr
     
     let IT(b, c) = If(b, c, Skip)
     let (/>) s1 s2 = Seq(s1, s2)
@@ -69,3 +73,5 @@ module Interpreter.Language
         Declare var />
         (var .<-. init) />
         While(guard, body /> step)
+
+    type program = Map<string, string list * stmnt>

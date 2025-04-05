@@ -93,7 +93,9 @@ module Interpreter.State
             Error (error.VarNotDeclared x);;
     
     let push _ = failwith "not implemented"
-    let pop _ = failwith "not implemented"  
+    let pop _ = failwith "not implemented" 
+    let pushFrame _ = failwith "not implemented"
+    let popFrame _ = failwith "not implemented"
     
     (*
         Below we introduce new methods for working with memory using functions from Memory.fs
