@@ -39,8 +39,9 @@ module Interpreter.State
         A function that returns a state with an empty variable environment and memory of size "memSize"
 
         TODO: V4 COMMENTS
+        TODO: V5 COMMENTS EX7 "program" is unused (red)
     *)
-    let mkState memSize oseed = 
+    let mkState memSize oseed (program: program) = 
         match oseed with
         | Some(seed) -> { variables = Map.empty; memory = empty memSize; rng = System.Random(seed) }
         | None -> { variables = Map.empty; memory = empty memSize; rng = System.Random() }

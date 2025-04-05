@@ -9,6 +9,8 @@
     <Compile Include="Interpreter\Language.fs" />
     <Compile Include="Interpreter\Memory.fsi" />
     <Compile Include="Interpreter\Memory.fs" />
+    <Compile Include="Interpreter\StateMonad.fs" />
+    <Compile Include="Interpreter\StateMonad.fsi" />
     <Compile Include="Interpreter\State.fsi" />
     <Compile Include="Interpreter\State.fs" />
     <Compile Include="Interpreter\Eval.fs" />

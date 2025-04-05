@@ -19,8 +19,9 @@
         A function that returns a state with an empty variable environment and memory of size "memSize"
 
         TODO: V4 COMMENTS
+        TODO: V5 COMMENTS EX7 "program" is unused (red)
     *)
-    val mkState : int -> int option -> state
+    val mkState : int -> int option-> program -> state
 
     (*
     TODO: V4
