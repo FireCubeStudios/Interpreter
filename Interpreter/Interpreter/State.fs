@@ -26,10 +26,9 @@ module Interpreter.State
             false;;
     
     (*
-        A "state" type record which contains a Map from strings to integers that contains the variables
-        aka basically a Map<VARIABLE_NAME, VARIABLE_VALUE> for the variables
-        This represnts the current program state
-        NEW: Added memory with the "memory" type from Memory.fs
+        A "state" type record which represents the current program state
+        It contains a Map from strings to integers that contains the variables e.g Map<VARIABLE_NAME, VARIABLE_VALUE>
+        The state also contains a "memory" record which represents the current program memory
     *)
     type state = { variables: Map<string, int>; memory: memory }
 
@@ -87,17 +86,25 @@ module Interpreter.State
         Below we introduce new methods for working with memory using functions from Memory.fs
     *)
 
-    (* TODO ALL COMMENTS
+    (* 
+        A function which given a variable 'x', a memory size "size" and a variable environment state "st"
+        Allocates a "size" amount of memory in "st" and returns:
+        - Ok st' where st' is the state "st" with the memory allocated and with the variable "x" pointing to the newly allocated memory
+        - Returns a "Result.Error" depending on if "alloc" or "setVar" failed
     *)
-    let alloc x size state =
-        match alloc size state.memory with
+    let alloc x size st =
+        match alloc size st.memory with
         | Ok (mem', ptr) -> 
-            match setVar x ptr state with
+            match setVar x ptr st with
             | Ok st' -> Ok { st' with memory = mem' }  // Update memory in new state
             | Error e -> Error e  // Variable assignment failed
         | Error e -> Error e  // Memory allocation failed
     
     (*
+        A function which takes a pointer "ptr", a memory size "size" and a variable environment state "state"
+        It frees up memory from the "state" memory starting at the pointer position "ptr" in the "state" memory and returns:
+        - Ok st' where st' is the state with the memory freed while the state variables remain the same
+        - Returns a "Result.Error" from the "free" function
     *)
     let free ptr size state = 
         let memory = free ptr size state.memory
@@ -106,6 +113,10 @@ module Interpreter.State
         | Error e -> Error e
 
     (*
+        A function which takes a pointer "ptr", a variable 'v' and a variable environment state "state"
+        It sets the variable 'v' at the pointer position "ptr" in the "state" memory and returns:
+        - Ok st' where st' is the state with the memory having the variable 'v' at "ptr" while the state variables remain the same
+        - Returns a "Result.Error" from the "setMem" function
     *)
     let setMem ptr v state = 
         let memory = setMem ptr v state.memory
@@ -114,5 +125,9 @@ module Interpreter.State
         | Error e -> Error e
        
     (*
+        A function which takes a pointer "ptr" and a variable environment state "state"
+        It gets the variable 'v' at the pointer position "ptr" in the "state" memory and returns:
+        - Ok v' where v' is the variable at "ptr" in the "state" memory
+        - Returns a "Result.Error" from the "getMem" function
     *)
     let getMem ptr state = getMem ptr state.memory

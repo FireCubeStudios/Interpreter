@@ -49,18 +49,34 @@
         Below we introduce new methods for working with memory using functions from Memory.fs
     *)
 
-    (*
+    (* 
+        A function which given a variable 'x', a memory size "size" and a variable environment state "st"
+        Allocates a "size" amount of memory in "st" and returns:
+        - Ok st' where st' is the state "st" with the memory allocated and with the variable "x" pointing to the newly allocated memory
+        - Returns a "Result.Error" depending on if "alloc" or "setVar" failed
     *)
     val alloc : string -> int -> state -> Result<state, error>
     
     (*
+        A function which takes a pointer "ptr", a memory size "size" and a variable environment state "state"
+        It frees up memory from the "state" memory starting at the pointer position "ptr" in the "state" memory and returns:
+        - Ok st' where st' is the state with the memory freed while the state variables remain the same
+        - Returns a "Result.Error" from the "free" function
     *)
     val free : int -> int -> state -> Result<state, error>
 
     (*
+        A function which takes a pointer "ptr", a variable 'v' and a variable environment state "state"
+        It sets the variable 'v' at the pointer position "ptr" in the "state" memory and returns:
+        - Ok st' where st' is the state with the memory having the variable 'v' at "ptr" while the state variables remain the same
+        - Returns a "Result.Error" from the "setMem" function
     *)
     val setMem : int -> int -> state -> Result<state, error>
        
     (*
+        A function which takes a pointer "ptr" and a variable environment state "state"
+        It gets the variable 'v' at the pointer position "ptr" in the "state" memory and returns:
+        - Ok v' where v' is the variable at "ptr" in the "state" memory
+        - Returns a "Result.Error" from the "getMem" function
     *)
     val getMem : int -> state -> Result<int, error>

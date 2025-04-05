@@ -11,7 +11,7 @@
     open Language
 
     (*
-        A "memory" type record which contains a Map from integers memory adresses) to integers (memory values)
+        A "memory" type record which contains a Map from integers (memory adresses) to integers (memory values)
         Also contains an integer "next" which is a pointer to the next available free memory address
         The "memory" map has memory addresses -> values 
         Whenever we allocate memory the "next" pointer is increased (for simplicity it will never decrease)
