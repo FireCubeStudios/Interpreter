@@ -140,10 +140,10 @@ module Interpreter.Eval
 
     let rec mergeStrings es s st =
         match es with
-        | [] -> s
+        | [] -> Ok ""
         | a::es -> 
             match arithEval a st with
-            | Ok x -> 
+            | Ok x -> Ok "TEMPORARY"
                 // replace the corresponding occurence of % in s with this
             | Error e -> Error e;;
     // END REGION
