@@ -21,9 +21,8 @@ module Interpreter.Eval
           '/' = integer division
         - return Result.Ok(x % y) if 'a' is equal to Mod(x, y), 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
           'y' should also not be 0 and if it is then we return "Result.Error" of type "error.DivisionByZero"
-        - otherwise we propagate the "Result.Error" type from recursive calls or other functions that returned error
-
-        NOTE: OUTDATED, need comment for memRead
+        - return Result.Ok(v) if 'a' is equal to MemRead e1, 'e1' evaluates to Result.Ok(ptr) and "ptr" points to 'v' in the memory of the state
+        - otherwise we propagate the "Result.Error" type from the recursive calls or other functions that returned "error"
     *)
     let rec arithEval a st = 
         match a with
@@ -146,10 +145,28 @@ module Interpreter.Eval
                 We return the new state environment variable "st" which has evaluated "While(b, s)"
                 Otherwise if the result of 's' evaluated on "st" was of type "Result.Error" then we return that error
             - Otherwise we return the original state environment variable "st"
+      
+        - return Result.Ok(st) if 's' is equal to Alloc(x, e) and the variable 'x' is declared
+            First we check if 'e' evaluates to "Result.Ok(size)" instead of "Result.Error"
+            Then we use the "alloc" function to allocate a memory of amount "size"
+            We return if "alloc" evaluates to "Result.Ok(st'', ptr)"
+                where st' is equal to st'' but with the variable x set to ptr.
+            Otherwise if it was evaluated to a "Result.Error" then we return that error
+
+        - return Result.Ok(st) if 's' is equal to Free(e1, e2) and if "e1" evaluates to "Result.Ok(ptr)"
+            Next we check if "e2" evaluates to "Result.Ok(size)" instead of "Result.Error"
+            Then we use the "free" function to free memory at "ptr" of amount "size"
+            We return if "free" evaluates to "Result.Ok(st')"
+                where st' is the state "st" with the memory being freed starting at pointer "ptr"
+            Otherwise if it was evaluated to a "Result.Error" then we return that error
+
+        - return Result.Ok(st) if 's' is equal to MemWrite(e1, e2) and if "e1" evaluates to "Result.Ok(ptr)"
+            Next we check if "e2" evaluates to "Result.Ok(v)" instead of "Result.Error"
+            Then we use the "setMem" function to set the value of the memory at "ptr" to be 'v'
+            We return if it evaluetes to "Result.Ok(st')" where st' is the state with 'v' at the "ptr"
+            Otherwise if it was evaluated to a "Result.Error" then we return that error
 
         - otherwise we propagate the "Result.Error" type from "declare", "setVar", "arithEval", "boolEval" and recursive "stmntEval" calls
-
-        NOTE: OUTDATED
     *)
     let rec stmntEval s st = 
         match s with
