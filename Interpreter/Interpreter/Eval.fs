@@ -1,10 +1,10 @@
-module Interpreter.Eval
+﻿module Interpreter.Eval
     (*
-        The interpreter code that evaluates arithmetic statements and boolean statements
+        TEMPORARY
     *)
     open Result
     open Language
-    open State
+    open StateMonad
 
     (* BELOW IS FROM OTHER "FUNCTIONAL" CODE FOLDER RTODO: ADD COMMENTS*)
     let readFromConsole () = System.Console.ReadLine().Trim()
@@ -16,107 +16,52 @@ module Interpreter.Eval
         | (true, n) -> n
         | (false, n) -> printfn "%s is not an integer" input // Fixes bug "The type 'string' is not compatible with the type 'Printf.TextWriterFormat<'a>'"
                         readInt ();;
-    (* end of regin*)
+    (* end of region*)
     
-    (*
-        ArithEval:
-        A function which evaluates arithmetic statements
-        It takes an arithmetic expression 'a' of type "aexpr" defined in Language.fs
-        It also takes in a variable state environment "st" of type "state" defined in State.fs
-        The arithmetic expression 'a' is an expression tree which is recursively evaluated and the result is returned
-        The result is returned as a "Result<int, error>" type where "error" is defined in Language.fs:
-        - return Result.Ok(n) if 'a' is equal to "Num n"
-        - return Result.Ok(x) if 'a' is equal to "Var v" and the "state" contains the variable 'v'
-        - return Result.Ok(x + y) if 'a' is equal to Add(x, y), 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-        - return Result.Ok(x * y) if 'a' is equal to Mul(x, y), 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-        - return Result.Ok(x / y) if 'a' is equal to Div(x, y), 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-          'y' should also not be 0 and if it is then we return "Result.Error" of type "error.DivisionByZero"
-          '/' = integer division
-        - return Result.Ok(x % y) if 'a' is equal to Mod(x, y), 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-          'y' should also not be 0 and if it is then we return "Result.Error" of type "error.DivisionByZero"
-        - otherwise we propagate the "Result.Error" type from recursive calls or other functions that returned error
-
-        NOTE: OUTDATED, need comment for memRead
-        TODO V4 V3
-    *)
-    (*
-        BoolEval:
-        A function which evaluates boolean statements
-        It takes a boolean expression 'b' of type "bexpr" defined in Language.fs
-        It also takes in a variable state environment "st" of type "state" defined in State.fs
-        The boolean expression 'b' is an expression tree which is recursively evaluated and the result is returned
-        The result is returned as a "Result<bool, error>" type where "error" is defined in Language.fs:
-        - return Result.Ok(true) if 'b' is equal to TT
-        - return Result.Ok(x = y) if 'b' is equal to Eq(x, y), where 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-          'x' and 'y' are of type "aexpr"
-        - return Result.Ok(x < y) if 'b' is equal to Lt(x, y), where 'x' evaluates to "Result.Ok(x)" and 'y' evaluates to "Result.Ok(y)"
-          'x' and 'y' are of type "aexpr"
-        - return Result.Ok(a && b) if 'b' is equal to Conj(b1, b2), where 'b1' evaluates to "Result.Ok(b1)" and 'y' evaluates to "Result.Ok(b2)"
-          'b1' and 'b2' are of type "bexpr"
-        - return Result.Ok(not bool) if 'b' is equal to Not(bool), where 'bool' evaluates to "Result.Ok(bool)" and is of type "bexpr"
-        - otherwise we propagate the "Result.Error" type from "arithEval" or recursive "boolEval" calls
-    *)
-    let rec arithEval a st = 
+    let rec arithEval a = 
         match a with
-        | Num n -> Ok n
-        | Var v -> getVar v st
+        | Num n -> ret n
+        | Var v -> getVar v
         | Add (x, y) -> 
-            match arithEval x st with
-            | Ok x -> match arithEval y st with
-                      | Ok y -> Ok (x + y)
-                      | Error e -> Error e
-            | Error e -> Error e
-        | Mul (x, y) -> 
-            match arithEval x st with
-            | Ok x -> match arithEval y st with
-                      | Ok y -> Ok (x * y)
-                      | Error e -> Error e
-            | Error e -> Error e
-        | Div (x, y) -> 
-            match arithEval x st with
-            | Ok x -> match arithEval y st with
-                      | Ok y -> if y <> 0 then Ok (x / y) else Error error.DivisionByZero // y <> 0 == y != 0
-                      | Error e -> Error e
-            | Error e -> Error e
-        | Mod (x, y) -> 
-            match arithEval x st with
-            | Ok x -> match arithEval y st with
-                      | Ok y -> if y <> 0 then Ok (x % y) else Error error.DivisionByZero // y <> 0 == y != 0
-                      | Error e -> Error e
-            | Error e -> Error e
-        | MemRead e1 ->   
-            match arithEval e1 st with
-            | Ok ptr -> 
-                match getMem ptr st with
-                | Ok x -> Ok x
-                | Error e -> Error e
-            | Error e -> Error e
-        | Random -> Ok (random st)
-        | Read -> Ok (readInt())
-        | Cond (b, a1, a2) -> 
-            match boolEval b st with
-            | Ok x -> if x = true then
-                        match arithEval a1 st with
-                        | Ok x -> Ok x
-                        | Error e -> Error e
-                      else
-                        match arithEval a2 st with
-                        | Ok x -> Ok x
-                        | Error e -> Error e
-            | Error e -> Error e
-    and boolEval b st =
+                arithEval x >>= fun x ->  
+                arithEval y >>= fun y -> ret (x + y)
+        | Mul (x, y) ->  
+                arithEval x >>= fun x ->  
+                arithEval y >>= fun y -> ret (x * y)
+        | Div (x, y) ->  
+                arithEval x >>= fun x ->  
+                arithEval y >>= fun y ->  
+                    if y <> 0 then ret (x / y) else fail error.DivisionByZero // y <> 0 == y != 0    
+        | Mod (x, y) ->  
+                arithEval x >>= fun x ->  
+                arithEval y >>= fun y ->  
+                    if y <> 0 then ret (x % y) else fail error.DivisionByZero // y <> 0 == y != 0
+        | MemRead e1 ->
+                arithEval e1 >>= fun ptr ->  
+                getMem ptr >>= fun x -> ret x
+        | Random -> random
+        | Read -> ret(readInt())
+        | Cond (b, a1, a2) ->
+                boolEval b >>= fun x ->  
+                if x = true then 
+                    arithEval a1
+                else
+                    arithEval a2
+        | FunctionCall(f, list) -> failwith "not implemented"
+    and boolEval b =
         match b with
-        | TT -> Ok true
-        | Eq(x, y) -> arithEval x st |> Result.bind (fun x -> 
-                      arithEval y st |> Result.bind (fun y -> Ok (x = y))) 
-        | Lt(x, y) -> arithEval x st |> Result.bind (fun x -> 
-                      arithEval y st |> Result.bind (fun y -> Ok (x < y))) 
-        | Conj(b1, b2) -> boolEval b1 st |> Result.bind (fun b1 -> 
-                          boolEval b2 st |> Result.bind (fun b2 -> Ok (b1 && b2)))
-        | Not(bool) -> boolEval bool st |> Result.bind (fun bool ->  Ok (not bool)) 
+        | TT -> ret true
+        | Eq(x, y) -> arithEval x >>= fun x -> 
+                      arithEval y >>= fun y -> ret (x = y)
+        | Lt(x, y) -> arithEval x >>= fun x -> 
+                      arithEval y >>= fun y -> ret (x < y) 
+        | Conj(b1, b2) -> 
+                      boolEval b1 >>= fun x -> 
+                      boolEval b2 >>= fun y -> ret (x && y) 
+        | Not(bool) -> boolEval bool >>= fun bool -> ret(not bool);;
 
     // Equivalent to arithEval with the use of Result.bind
-    let rec arithEval2 a st : Result<int, error> = 
+   (* let rec arithEval2 a st : Result<int, error> = 
         match a with
         | Num n -> Ok n
         | Var v -> getVar v st
@@ -132,119 +77,34 @@ module Interpreter.Eval
         | Random -> Ok (random st)
         | Read -> Ok (readInt())
         | Cond (b, a1, a2) -> boolEval b st |> Result.bind(fun x -> if x = true then arithEval2 a1 st else arithEval2 a2 st);;
-
+        *)
 
 
     //TODO V4 COMMENTING FOR BELOW CODE
     let split (s1 : string) (s2 : string) = s2 |> s1.Split |> Array.toList // split a string s1 from all occurences of s2 like split "ababc" "b"
 
-    let rec mergeStrings es s st =
+    let rec mergeStrings es s =
         match es with
-        | [] -> Ok ""
-        | a::es -> 
-            match arithEval a st with
-            | Ok x -> Ok "TEMPORARY"
-                // replace the corresponding occurence of % in s with this
-            | Error e -> Error e;;
+        | [] -> ret ()
+        | a::es ->  arithEval a >>= fun x -> ret ();;
     // END REGION
 
-
-
-
-    (*
-        A function which evaluetes statements
-        It takes a statement expression 's' of type "stmnt" defined in Language.fs
-        It also takes in a variable state environment "st" of type "state" defined in State.fs
-        The statement expression 'stmnt' is an expression tree which is recursively evaluated and the result is returned
-        The result is returned as a "Result<state, error>" type where "error" is defined in Language.fs:
-
-        - return Result.Ok(st) if 's' is equal to "Skip"
-
-        - return Result.Ok(st) if 's' is equal to Declare(v) and 'v' is a variable name of type string
-            We return the state variable environment "st" with the variable 'v' declared in "st"
-            We do this by using the State.fs "declare" function
-
-        - return Result.Ok(st) if 's' is equal to Assign(v, x)
-            'v' is a variable name of type string and 'x' is a variable value of type "aexpr"
-            We assign a value 'x' to the variable 'v' in the "st" state environment by using the State.fs "setVar" function
-            We then return the new state variable environment "st"
-
-        - return Result.Ok(st) if 's' is equal to Seq(s1, s2)
-            Both "s1" and "s2" are statements of type "stmnt"
-            Firstly we evaluate "s1" on the state envionrment "st"
-            We will then evaluate "s2" on the resulting state environment "st" from evaluating "s1" earlier
-            We then return the new state variable environment "st" 
-            The returned result essentially had the statements "s1" and "s2" evaluated sequentially on "st"
-
-        - return Result.Ok(st) if 's' is equal to If(b, s1, s2) and 'b' is a boolean expression of type "bexpr"
-            "s1" and "s2" are statements of the type "stmnt"
-            Firstly we check if the boolean expression 'b' evaluates to "Result.Ok(bool)" instead of a "Result.Error"
-            if "bool" exists and is true or false we do one of the following:
-            - If it is true then we evaluate the statement "s1" on the state environment "st"
-            - Otherwise we evaluate the statement "s2" on the state environment "st"
-            We then return the new state environment "st" as "Result.Ok(st)"
-
-        - return Result.Ok(st) if 's' is equal to While(b, s) and 'b' is a boolean expression of type "bexpr"
-            's' is a statement of the type "stmnt"
-            Firstly we check if the boolean expression 'b' evaluates to "Result.Ok(bool)" instead of a "Result.Error"
-            if "bool" exists and is true or false we do one of the following:
-            - If it is true then we evaluate the statement 's' on the state environment "st"
-                If the result of this is "Result.Ok(st)" where "st" is a new state with 's' evaluated then we do the following
-                We evaluate the statement "While(b, s)" where 'b' is the boolean expression and 's' is a statement
-                'b' and 's' are the same as from the original function parameters
-                We return the new state environment variable "st" which has evaluated "While(b, s)"
-                Otherwise if the result of 's' evaluated on "st" was of type "Result.Error" then we return that error
-            - Otherwise we return the original state environment variable "st"
-
-        - otherwise we propagate the "Result.Error" type from "declare", "setVar", "arithEval", "boolEval" and recursive "stmntEval" calls
-
-        NOTE: OUTDATED v3 v4
-    *)
-    let rec stmntEval s st = 
+    let rec stmntEval s = 
         match s with
-        | Skip -> Ok st
-        | Declare v -> declare v st
-        | Assign(v, x) -> arithEval x st |> Result.bind (fun x -> setVar v x st)
-        | Seq(s1, s2) -> stmntEval s1 st |> Result.bind (fun state -> stmntEval s2 state)
-        | If(b, s1, s2) -> boolEval b st |> Result.bind (fun bool -> 
-            if bool then 
-                stmntEval s1 st
-            else 
-                stmntEval s2 st)
-        | While(b, s) -> boolEval b st |> Result.bind (fun bool -> 
-            if bool then 
-                stmntEval s st |> Result.bind (fun state -> stmntEval (While(b, s)) state)
-            else 
-                Ok st)
-        | Alloc(x, e) ->
-            match arithEval e st with
-            | Ok size -> 
-                match alloc x size st with
-                    | Ok st' -> Ok st'
-                    | Error e -> Error e
-            | Error e -> Error e
-        | Free(e1, e2) ->
-            match arithEval e1 st with
-            | Ok ptr ->
-                match arithEval e2 st with
-                | Ok size ->
-                    match free ptr size st with
-                    | Ok st' -> Ok st'
-                    | Error e -> Error e
-                | Error e -> Error e
-            | Error e -> Error e
-        | MemWrite(e1, e2) ->
-            match arithEval e1 st with
-            | Ok ptr ->
-                match arithEval e2 st with
-                | Ok v ->
-                    match setMem ptr v st with
-                    | Ok st' -> Ok st'
-                    | Error e -> Error e
-                | Error e -> Error e
-            | Error e -> Error e
-        | Print(es, s) -> 
-            match mergeStrings es s st with
-            | Ok x -> Ok st
-            | Error e -> Error (error.IllFormedPrint (s, [0]));; //unfinished
+        | Skip -> ret ()
+        | Declare v -> declare v
+        | Assign(v, x) -> arithEval x >>= fun x -> setVar v x
+        | Seq(s1, s2) -> stmntEval s1 >>= fun state -> stmntEval s2
+        | If(b, s1, s2) -> boolEval b >>= fun bool -> if bool then stmntEval s1 else stmntEval s2
+        | While(b, s) -> boolEval b >>= fun bool ->
+                         if bool then
+                            stmntEval s >>= fun state -> stmntEval (While(b, s))
+                         else
+                            ret ()
+        | Alloc(x, e) -> arithEval e >>= fun size -> alloc x size
+        | Free(e1, e2) -> arithEval e1 >>= fun ptr -> arithEval e2 >>= fun size -> free ptr size
+        | MemWrite(e1, e2) -> arithEval e1 >>= fun ptr -> arithEval e2  >>= fun v -> setMem ptr v
+        | Print(es, s) -> mergeStrings es s
+        | Return x -> failwith "not implemented";; // if result.Chars == 0 then fail (error.IllFormedPrint (s, [0]));; unfinished
+        
 

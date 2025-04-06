@@ -13,6 +13,7 @@
     <Compile Include="Interpreter\State.fs" />
     <Compile Include="Interpreter\StateMonad.fsi" />
     <Compile Include="Interpreter\StateMonad.fs" />
+    <Compile Include="Interpreter\EvalLegacy.fs" />
     <Compile Include="Interpreter\Eval.fs" />
     <Compile Include="Programs.fs" />
   </ItemGroup>

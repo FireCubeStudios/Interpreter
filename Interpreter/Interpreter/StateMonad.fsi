@@ -5,15 +5,12 @@
 
     type 'a stateMonad
     
-    val ret  : 'a -> 'a stateMonad    
+    val ret : 'a -> 'a stateMonad    
     
     val (>>=) : 'a stateMonad -> ('a -> 'b stateMonad) -> 'b stateMonad
     val (>>>=) : 'a stateMonad -> 'b stateMonad -> 'b stateMonad
     
     val fail : error -> 'a stateMonad
-
-    val (>>=) : 'a stateMonad -> ('a -> 'b stateMonad) -> 'b stateMonad
-    val (>>>=) : 'a stateMonad -> 'b stateMonad -> 'b stateMonad
 
     (* Below are functions for the Monad *)
 
@@ -33,4 +30,6 @@
 
     type random = int stateMonad
 
-    val evalState : state -> 'a stateMonad -> 'a option
+    val random : int stateMonad
+
+    val evalState : state -> 'a stateMonad -> Result<'a, error>
