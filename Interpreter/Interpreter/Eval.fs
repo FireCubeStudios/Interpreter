@@ -137,8 +137,17 @@ module Interpreter.Eval
 
     //TODO V4 COMMENTING FOR BELOW CODE
     let split (s1 : string) (s2 : string) = s2 |> s1.Split |> Array.toList // split a string s1 from all occurences of s2 like split "ababc" "b"
-
+    
     let rec mergeStrings es s st =
+        match es with
+        | [] -> Ok ""
+        | a::es -> 
+            match arithEval a st with
+            | Ok x -> Ok "TEMPORARY"
+                // replace the corresponding occurence of % in s with this
+            | Error e -> Error e;;
+
+    let rec mergeStrings2 es s st =
         match es with
         | [] -> Ok ""
         | a::es -> 
@@ -245,6 +254,8 @@ module Interpreter.Eval
             | Error e -> Error e
         | Print(es, s) -> 
             match mergeStrings es s st with
-            | Ok x -> Ok st
-            | Error e -> Error (error.IllFormedPrint (s, [0]));; //unfinished
+            | Ok x -> 
+                    printfn "%s" x
+                    Ok st
+            | Error e -> Error e;; //Error (error.IllFormedPrint (s, [0]));; //unfinished
 
