@@ -47,7 +47,9 @@
         let (>*>.) _ _  = failwith "not implemented"
     *)
 
-    let parenthesise p = p // incorrect (not implemented)
+     // todo comments
+    let parenthesise p = pchar '(' >>. spaces >>. p .>> spaces .>> pchar ')' // new
+    let braces p = pchar '{' >>. spaces >>. p .>> spaces .>> pchar '}' // new optional
     let parseString = pstring "not implemented"
 
     let pid = pstring "not implemented"
