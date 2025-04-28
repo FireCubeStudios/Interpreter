@@ -28,16 +28,24 @@
     let pfunction : Parser<string> = pstring "function"
     let pret      : Parser<string> = pstring "ret"
     
-    let pwhitespaceChar = satisfy (fun c -> System.Char.IsWhiteSpace c) // new
-    let pletter         = satisfy (fun c -> System.Char.IsLetter c) // new
+    // todo comment
+    let pwhitespaceChar = satisfy (fun c -> System.Char.IsWhiteSpace c) <?> "whitespace" // new
+    let pletter         = satisfy (fun c -> System.Char.IsLetter c) <?> "letter" // new
     let palphanumeric   = satisfy (fun c -> System.Char.IsLetterOrDigit c) // new
 
-    let spaces         = pchar '_' |>> fun x -> [x]
-    let spaces1        = pchar '_' |>> fun x -> [x]
+    let spaces         = many pwhitespaceChar <?> "spaces" // new, pchar '_' |>> fun x -> [x]
+    let spaces1        = many pwhitespaceChar <?> "spaces1" // new, pchar '_' |>> fun x -> [x]
 
-    let (.>*>.) _ _ = failwith "not implemented"
-    let (.>*>) _ _  = failwith "not implemented"
-    let (>*>.) _ _  = failwith "not implemented"
+    //todo comment
+    let (.>*>.) p1 p2 = p1 .>> spaces .>>. p2
+    let (.>*>) p1 p2  = p1 .>> spaces .>> p2
+    let (>*>.) p1 p2  = p1 .>>. spaces >>. p2
+
+    (*´ old
+        let (.>*>.) _ _ = failwith "not implemented"
+        let (.>*>) _ _  = failwith "not implemented"
+        let (>*>.) _ _  = failwith "not implemented"
+    *)
 
     let parenthesise p = p // incorrect (not implemented)
     let parseString = pstring "not implemented"
