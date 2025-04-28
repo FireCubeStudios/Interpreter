@@ -1,0 +1,11 @@
+declare a;
+declare b;
+declare c;
+print ("Input number 1: ");
+a := read;
+print ("Input number 2: ");
+b := read;
+print ("Input number 3: ");
+c := read;
+print("The smallest number is %!\n", a < b ? a < c ? a : b < c ? b : c : b < c ? b : c < a ? c : a);
+print("The negation of the smallest number is %!", -(a < b ? a < c ? a : b < c ? b : c : b < c ? b : c < a ? c : a))

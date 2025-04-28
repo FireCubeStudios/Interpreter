@@ -1,0 +1,17 @@
+declare length;
+print("input length of array: ");
+length := read;
+declare arr;
+alloc arr length;
+declare i;
+while(i < length) {
+   [arr + i] := random;
+   i := i + 1
+};
+i := 0;
+print("\nAnd the random array looks as follows:\n\n");
+while(i < length) {
+   print("% ", [arr + i]);
+   i := i + 1
+}
+

@@ -1,17 +1,30 @@
-﻿// For more information see https://aka.ms/fsharp-console-apps
+﻿module Program
 
-open Interpreter.Programs
-open Interpreter.EvalLegacy
-open Interpreter.State
+    open Interpreter.Eval
+    open Interpreter.StateMonad
+    open Interpreter.State
+    open Interpreter.JParsec
 
-let runProgram prog =
-    42 |>
-    Some |>
-    mkState 10 |>
-    stmntEval prog |>
-    ignore
+    let rec parseArgs =
+        function
+        | []                -> Map.empty
+        | name::value::rest -> Map.add name (System.Int32.Parse(value)) (parseArgs rest)
+        | _                 -> failwith "Invalid input"
 
-// Uncomment the program you want to run
 
-runProgram guessANumber
-//runProgram bubbleSort
+    [<EntryPoint>]
+    let main args =
+        let m = args.[2..] |> Array.toList |> parseArgs
+ 
+        System.IO.File.ReadAllText(args.[1]) |>
+        runProgramParser |>
+        Result.map
+            (fun (prog, body) ->
+                stmntEval body |>
+                evalState
+                    (mkState
+                         (m |> Map.tryFind "--memSize" |> Option.defaultValue 0)
+                         (m |> Map.tryFind "--seed")
+                         prog)) |>
+        printfn "\n\n%A"
+        0

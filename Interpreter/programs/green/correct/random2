@@ -1,0 +1,12 @@
+declare min;
+declare max;
+print("Input minimum number: ");
+min := read;
+print("Input maximum number: ");
+max := read;
+if (min <= max) {
+   print("An interesting random number between % and % is %", min, max, min = max ? min : random % (max - min) + min)
+}
+else {
+   print("That won't do since the minimum number % is strictly larger than the maximum number %.", min, max)
+}

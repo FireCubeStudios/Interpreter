@@ -1,0 +1,39 @@
+declare max;
+print("Input a maximum number in the array: ");
+max := read;
+declare size;
+print("Input the size of the array: ");
+size := read;
+declare ptr;
+alloc ptr size;
+declare i;
+print("The array is:\n");
+while(i < size) {
+   [ptr + i] := random % (max + 1);
+   print("% ", [ptr + i]);
+   i := i + 1
+};
+print("\n");
+declare swapped;
+declare temp;
+swapped := 1;
+while(swapped > 0) {
+   swapped := 0;
+   i := 0;
+   while(i < size - 1) {
+      if([ptr + i] > [ptr + i + 1]) {
+         temp := [ptr + i];
+         [ptr + i] := [ptr + i + 1];
+         [ptr + i + 1] := temp;
+         swapped := 1
+      };
+      i := i + 1
+   }
+};
+i := 0;
+print("\nThe sorted array is: \n");
+while(i < size) {
+   print("% ", [ptr + i]);
+   i := i + 1
+}
+

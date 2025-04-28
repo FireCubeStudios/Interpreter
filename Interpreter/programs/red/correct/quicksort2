@@ -1,0 +1,67 @@
+function swap(ptr, i, j) {
+   declare temp;
+   temp := [ptr + i];
+   [ptr + i] := [ptr + j];
+   [ptr + j] := temp
+}
+
+function createRandomArray(max, size) {
+    declare ptr;
+    alloc ptr size;
+    for(i := 0; i < size; i := i + 1) {
+        [ptr + i] := random % (max + 1)
+    };
+    return ptr
+}
+
+function printPartition(ptr, lo, hi) {
+    for(i := lo; i < hi; i := i + 1) {
+        print("% ", [ptr + i])
+    };
+    print("\n")
+}
+
+function printArray(ptr, size) {
+    printPartition(ptr, 0, size - 1)
+}
+
+function rng(min, max) {
+    return min + random % (max + 1 - min)
+}
+
+function partition(ptr, lo, hi) {
+    declare pivot;
+    pivot := [ptr + rng(lo, hi)];
+    declare i;
+    declare j;
+    i := lo - 1;
+    j := hi + 1;
+    while (true) {
+        repeat { i := i + 1 } until ([ptr + i] >= pivot);
+        repeat { j := j - 1 } until ([ptr + j] <= pivot);
+        if(i >= j) { return j };
+        swap(ptr, i, j)
+    }
+}
+
+function quicksort(ptr, lo, hi) {
+    if(lo >= hi \/ lo < 0) { return 0 };
+    declare pi;
+    pi := partition(ptr, lo, hi);
+    quicksort(ptr, lo, pi);
+    quicksort(ptr, pi + 1, hi)
+}
+
+declare max;
+print("Input a maximum number in the array: ");
+max := read;
+declare size;
+print("Input the size of the array: ");
+size := read;
+declare ptr;
+ptr := createRandomArray(max, size);
+print("The array is:\n");
+printArray(ptr, size);
+quicksort(ptr, 0, size - 1);
+print("\nThe sorted array is: \n");
+printArray(ptr, size)

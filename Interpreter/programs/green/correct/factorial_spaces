@@ -1,0 +1,26 @@
+print("Input a number to calculate the factorial of: ");
+
+
+
+declare 
+
+x;
+x   := 
+read;
+declare        result;
+result :=               1;
+declare 
+
+i;
+i := x;
+while(i > 
+
+        0) {
+    result := 
+                result * 
+                        i;
+    i 
+    :=          i - 
+    1
+};
+print("The factorial of % is %.", x, result)

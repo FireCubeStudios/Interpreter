@@ -1,0 +1,7 @@
+declare a;
+declare b;
+print("Input a number: ");
+a := read;
+print("Input another number: ");
+b := read;
+print("The maximum number of the numbers % and % is %.", a, b, a > b ? a : b)

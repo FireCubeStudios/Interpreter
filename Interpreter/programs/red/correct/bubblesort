@@ -1,0 +1,57 @@
+function swap(ptr, i) {
+   declare temp;
+   temp := [ptr + i];
+   [ptr + i] := [ptr + i + 1];
+   [ptr + i + 1] := temp
+}
+
+function printArray(ptr, size) {
+   declare i;
+   while(i < size) {
+      print("% ", [ptr + i]);
+      i := i + 1
+   };
+   print("\n")
+}
+
+function createRandomArray(max, size) {
+   declare ptr;
+   alloc ptr size;
+   declare i;
+   while(i < size) {
+      [ptr + i] := random % (max + 1);
+      i := i + 1
+   };
+   return ptr
+}
+
+function sort(ptr, size) {
+   declare swapped;
+   swapped := 1;
+   while(swapped > 0) {
+      declare i;
+      swapped := 0;
+      i := 0;
+      while(i < size - 1) {
+         if([ptr + i] > [ptr + i + 1]) {
+            swap(ptr, i);
+            swapped := 1
+         };
+         i := i + 1
+      }
+   }
+}
+
+declare max;
+print("Input a maximum number in the array: ");
+max := read;
+declare size;
+print("Input the size of the array: ");
+size := read;
+declare ptr;
+ptr := createRandomArray(max, size);
+print("The array is:\n");
+printArray(ptr, size);
+sort(ptr, size);
+print("\nThe sorted array is: \n");
+printArray(ptr, size)

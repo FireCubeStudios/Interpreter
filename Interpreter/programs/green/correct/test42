@@ -1,0 +1,4 @@
+declare x;
+x := 42;
+print("The number is %", x)
+

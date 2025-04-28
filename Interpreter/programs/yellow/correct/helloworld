@@ -1,0 +1,10 @@
+declare x;
+print("Input times to print the best message of all time: ");
+x := read;
+if(x <= 0) {
+    print("You don't like to say hello?")
+}
+else {
+    repeat { print("Hello World!\n"); x := x - 1 }
+    until (x = 0)
+}

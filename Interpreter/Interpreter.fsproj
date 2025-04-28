@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Parser\FParsecLight.fsi" />
+    <Compile Include="Parser\FParsecLight.fs" />
+    <Compile Include="Parser\JParsec.fsi" />
+    <Compile Include="Parser\JParsec.fs" />
     <Compile Include="Interpreter\Language.fs" />
     <Compile Include="Interpreter\Memory.fsi" />
     <Compile Include="Interpreter\Memory.fs" />
@@ -15,7 +19,40 @@
     <Compile Include="Interpreter\StateMonad.fs" />
     <Compile Include="Interpreter\EvalLegacy.fs" />
     <Compile Include="Interpreter\Eval.fs" />
+    <Compile Include="Interpreter\Parser.fs" />
     <Compile Include="Programs.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="programs\.DS_Store" />
+    <None Include="programs\green\correct\bubblesort" />
+    <None Include="programs\green\correct\factorial" />
+    <None Include="programs\green\correct\factorial_spaces" />
+    <None Include="programs\green\correct\hello_world" />
+    <None Include="programs\green\correct\maximum" />
+    <None Include="programs\green\correct\nested_cond" />
+    <None Include="programs\green\correct\random" />
+    <None Include="programs\green\correct\random2" />
+    <None Include="programs\green\correct\random_array" />
+    <None Include="programs\green\correct\read" />
+    <None Include="programs\green\correct\read2" />
+    <None Include="programs\green\correct\test42" />
+    <None Include="programs\red\correct\bubblesort" />
+    <None Include="programs\red\correct\quicksort" />
+    <None Include="programs\red\correct\quicksort2" />
+    <None Include="programs\yellow\correct\bubblesort" />
+    <None Include="programs\yellow\correct\bubblesort_pushpop" />
+    <None Include="programs\yellow\correct\helloworld" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FParsec" Version="2.0.0-beta2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="programs\green\parse_error\" />
+    <Folder Include="programs\green\semantic_error\" />
   </ItemGroup>
 
 </Project>

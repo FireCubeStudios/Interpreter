@@ -1,4 +1,4 @@
-module Interpreter.Programs
+module Programs
     (*
         Example programs
     *)

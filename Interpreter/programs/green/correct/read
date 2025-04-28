@@ -1,0 +1,4 @@
+declare number;
+print("Input a number: ");
+number := read;
+print("You input the number %!", number)
