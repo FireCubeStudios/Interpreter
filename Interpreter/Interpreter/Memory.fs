@@ -10,6 +10,7 @@
     *)
     open Language
 
+    // Legacy module contains old memory code which is unchanged
     module Legacy =
         
         (*
@@ -89,15 +90,40 @@
             | Some v -> Ok v
             | None -> Error (error.MemoryNotAllocated ptr)
 
-    // Below used to maintain compatibility
+    // New TODO comments
+    type message =  
+    | Alloc of int * AsyncReplyChannel<Result<(Legacy.memory * int), error>> // size, reply channel
+    | Free of int * int * AsyncReplyChannel<Result<Legacy.memory, error>> // ptr, size, reply channel
+    | SetMem of int * int * AsyncReplyChannel<Result<Legacy.memory, error>> // ptr, v, reply channel
+    | GetMem of int * AsyncReplyChannel<Result<int, error>>  // ptr, reply channel
 
-    type memory = Legacy.memory
+    type memory = Mem of MailboxProcessor<message> // memory type is now using MailboxProcessor
 
-    let empty (memSize: int) = Legacy.empty memSize
+    // New TODO comments
+    let inbox s (i : MailboxProcessor<message>) =
+        let rec messageLoop (mem : Legacy.memory) =
+            async { 
+                let! message = i.Receive()
+                match message with
+                | Alloc (size, channel) -> channel.Reply(Legacy.alloc size mem)
+                | Free (ptr, size, channel) -> channel.Reply(Legacy.free ptr size mem)
+                | SetMem (ptr, v, channel) -> channel.Reply(Legacy.setMem ptr v mem)
+                | GetMem (ptr, channel) -> channel.Reply(Legacy.getMem ptr mem)
+            }
+        messageLoop (Legacy.empty s)
 
-    let free ptr size mem = Legacy.free ptr size mem
+    // from template, TODO comments
+    let empty s = Mem (MailboxProcessor.Start (inbox s))
 
-    let setMem ptr v mem = Legacy.setMem ptr v mem
+    let alloc size mem = match mem with 
+                         | Mem mailbox -> mailbox.PostAndReply(fun channel -> Alloc(size, channel))
 
-    let getMem ptr mem = Legacy.getMem ptr mem
+    let free ptr size mem = match mem with 
+                            | Mem mailbox -> mailbox.PostAndReply(fun channel -> Free(ptr, size, channel))
+
+    let setMem ptr v mem = match mem with 
+                           | Mem mailbox -> mailbox.PostAndReply(fun channel -> SetMem(ptr, v, channel))
+
+    let getMem ptr mem = match mem with 
+                         | Mem mailbox -> mailbox.PostAndReply(fun channel -> GetMem(ptr, channel))
 
