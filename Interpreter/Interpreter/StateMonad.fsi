@@ -33,3 +33,6 @@
     val random : int stateMonad
 
     val evalState : state -> 'a stateMonad -> Result<'a, error>
+
+    // new todo comments
+    val fork : unit stateMonad list -> unit stateMonad

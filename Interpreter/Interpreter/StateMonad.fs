@@ -68,3 +68,13 @@
        match f st with
         | Ok (v, _) -> Ok v
         | Error e -> Error e;
+
+    // new todo comments
+    let fork (ss: unit stateMonad list) : unit stateMonad =
+        SM (fun st ->
+            let results = List.map (fun m -> evalState st m) ss
+            if List.forall Result.isOk results then
+                Ok((), st)
+            else
+                Error error.DivisionByZero// TEMPORARY, i did yellow exercises earlier but now i want to do green
+        )

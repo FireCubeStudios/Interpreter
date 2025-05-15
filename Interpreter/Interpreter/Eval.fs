@@ -105,6 +105,10 @@
         | Free(e1, e2) -> arithEval e1 >>= fun ptr -> arithEval e2 >>= fun size -> free ptr size
         | MemWrite(e1, e2) -> arithEval e1 >>= fun ptr -> arithEval e2  >>= fun v -> setMem ptr v
         | Print(es, s) -> mergeStrings es s
-        | Return x -> failwith "not implemented";; // if result.Chars == 0 then fail (error.IllFormedPrint (s, [0]));; unfinished
+        | Return x -> failwith "not implemented" // if result.Chars == 0 then fail (error.IllFormedPrint (s, [0]));; unfinished
+        | Fork ss -> // Evaluates all statements in ss and runs them in parallel using fork from StateMonad.fs
+                    let evaluatedLst = List.map (fun stmnt -> stmntEval stmnt) ss
+                    fork evaluatedLst
+        | Join -> ret ();; // Temporary
         
 
