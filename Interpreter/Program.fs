@@ -3,7 +3,7 @@
     open Interpreter.Eval
     open Interpreter.StateMonad
     open Interpreter.State
-    open Interpreter.JParsec
+    open Interpreter.Parser
 
     let rec parseArgs =
         function
